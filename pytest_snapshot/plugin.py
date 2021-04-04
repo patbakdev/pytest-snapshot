@@ -101,7 +101,13 @@ class Snapshot(object):
 
         return snapshot_path
 
-    def assert_match(self, value: str, snapshot_name: Union[str, Path]):
+    def assert_match(self, value, snapshot_name: Union[str, Path], func=None, *args, **kwargs):
+        if func is None:
+            self.string_match(value, snapshot_name)
+        else:
+            func(self, value, snapshot_name, *args, **kwargs)
+
+    def string_match(self, value: str, snapshot_name: Union[str, Path]):
         """
         Asserts that ``value`` equals the current value of the snapshot with the given ``snapshot_name``.
 
@@ -152,7 +158,7 @@ class Snapshot(object):
                     "snapshot {} doesn't exist. (run pytest with --snapshot-update to create it)".format(
                         shorten_path(snapshot_path)))
 
-    def assert_match_dir(self, values_by_filename: Dict[str, str], snapshot_dir_name: Union[str, Path]):
+    def assert_match_dir(self, values_by_filename: Dict[str, str], snapshot_dir_name: Union[str, Path], func=None, *args, **kwargs):
         """
         Asserts that the values in values_by_filename equal the current values in the given snapshot directory.
 
@@ -187,7 +193,7 @@ class Snapshot(object):
 
         # Call assert_match to add, update, or assert equality for all snapshot files in the directory.
         for name, value in values_by_filename.items():
-            self.assert_match(value, snapshot_dir_path.joinpath(name))
+            self.assert_match(value, snapshot_dir_path.joinpath(name), func, *args, **kwargs)
 
 
 def shorten_path(path: Path) -> Path:
